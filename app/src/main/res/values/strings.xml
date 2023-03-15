@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">LocationWorkManager</string>
+    <string name="button_text">Start Work</string>
+    <string name="button_text_stop">Stop Work</string>
 </resources>
