@@ -13,14 +13,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.locationworkmanager.R.layout
+import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
+    @Inject lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private lateinit var button: Button
-    lateinit var buttonStop: Button
+    private lateinit var buttonStop: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,15 +36,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this,clickableText,Toast.LENGTH_LONG).show()
         }
 
-        val onClickListenerButton = View.OnClickListener {
-            viewModel.queueUpWork()
-        }
-
-        val onClickButtonStop = View.OnClickListener {
-            viewModel.stopWork()
-            Toast.makeText(this, "work is stopped", Toast.LENGTH_LONG).show()
-        }
-
+        /////////Task 1
         viewModel.makeClickableTextView(textView, clickableText, onClickListener)
 
         if (ContextCompat.checkSelfPermission(
@@ -62,11 +57,9 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_LOCATION_PERMISSION
             )
         } else {
-            // Permissions have already been granted, do your location-related tasks here
-            toastResults(this@MainActivity, lifecycleScope)
-            button.setOnClickListener(onClickListenerButton)
-            buttonStop.setOnClickListener(onClickButtonStop)
-
+            // Permissions have already been granted
+            PeriodicWorker.toastResults(lifecycleScope, this, fusedLocationProviderClient)
+            setUpButtons()
         }
     }
 
@@ -74,6 +67,9 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_LOCATION_PERMISSION = 1
     }
 
+    /**
+     * Necessary to get back the results of the Permission Check
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -86,8 +82,10 @@ class MainActivity : AppCompatActivity() {
                 grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED
             ) {
-                // Permissions have been granted, do your location-related tasks here
-                toastResults(this@MainActivity, lifecycleScope)
+                // Permissions have been granted
+                PeriodicWorker.toastResults(lifecycleScope, this, fusedLocationProviderClient)
+                setUpButtons()
+
             } else {
                 button.visibility = View.INVISIBLE
                 buttonStop.visibility = View.INVISIBLE
@@ -95,5 +93,22 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "You denied the permissions", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    /**
+     * setup buttons with click listeners.  One button starts the task, one stops it
+     */
+    fun setUpButtons() {
+        val onClickListenerButton = View.OnClickListener {
+            viewModel.queueUpWork()
+        }
+
+        val onClickButtonStop = View.OnClickListener {
+            viewModel.stopWork()
+            Toast.makeText(this, "work is stopped", Toast.LENGTH_LONG).show()
+        }
+
+        button.setOnClickListener(onClickListenerButton)
+        buttonStop.setOnClickListener(onClickButtonStop)
     }
 }

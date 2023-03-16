@@ -2,6 +2,8 @@ package com.example.locationworkmanager
 
 import android.content.Context
 import androidx.work.WorkManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,4 +18,10 @@ class LocationWorkManagerDI {
     fun providesWorkManager(@ApplicationContext context: Context): WorkManager {
         return WorkManager.getInstance(context)
     }
+
+    @Provides
+    fun providesFusedLocatiomClient(@ApplicationContext context: Context): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
+    }
+
 }

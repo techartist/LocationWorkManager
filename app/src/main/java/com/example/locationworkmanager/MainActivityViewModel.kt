@@ -19,8 +19,14 @@ import javax.inject.Inject
 private const val timeInterval = BuildConfig.TIME_INTERVAL // Get the time interval from BuildConfig
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor(val workManager: WorkManager): ViewModel() {
+class MainActivityViewModel @Inject constructor(
+    val workManager: WorkManager
 
+) : ViewModel() {
+
+    /**
+     * starts work manager
+     */
     fun queueUpWork() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -35,10 +41,16 @@ class MainActivityViewModel @Inject constructor(val workManager: WorkManager): V
         workManager.enqueue(periodicWorkRequest)
     }
 
+    /**
+     * stops work manager
+     */
     fun stopWork() {
         workManager.cancelAllWorkByTag(PeriodicWorker.WORK_TAG)
     }
 
+    /**
+     * Takes a textView and makes part of it clickable
+     */
     fun makeClickableTextView(textView: TextView, clickableText: String, onClickListener: View.OnClickListener) {
         val text = textView.text
         val spannable = SpannableString(text)
